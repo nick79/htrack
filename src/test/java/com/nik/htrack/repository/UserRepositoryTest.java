@@ -16,6 +16,7 @@ import java.util.Optional;
 class UserRepositoryTest {
 
     public static final String EMAIL = "first.last@example.com";
+
     @Autowired
     private UserRepository underTest;
 
@@ -27,7 +28,7 @@ class UserRepositoryTest {
     @Test
     void shouldFindUserByEmail() {
         // Given
-        User user = new User(1L, "First", "Last", EMAIL, "Password");
+        User user = new User(null, "First", "Last", EMAIL, "Password");
         underTest.save(user);
 
         // When
@@ -36,13 +37,13 @@ class UserRepositoryTest {
         // Then
         assertThat(optionalUser)
             .isPresent()
-            .hasValueSatisfying(u -> assertThat(u).usingRecursiveComparison().isEqualTo(user));
+            .hasValueSatisfying(u -> assertThat(u).usingRecursiveComparison().ignoringFields("id").isEqualTo(user));
     }
 
     @Test
     void shouldNotFindUserByEmailWhenEmailDoesNotExist() {
         // Given
-        User user = new User(1L, "First", "Last", EMAIL, "Password");
+        User user = new User(null, "First", "Last", EMAIL, "Password");
         underTest.save(user);
 
         // When
@@ -50,5 +51,31 @@ class UserRepositoryTest {
 
         // Then
         assertThat(optionalUser).isNotPresent();
+    }
+
+    @Test
+    void shouldCheckIfUserEmailExists() {
+        // Given
+        User user = new User(null, "First", "Last", EMAIL, "Password");
+        underTest.save(user);
+
+        // When
+        Boolean exists = underTest.existsUserByEmail(EMAIL);
+
+        // Then
+        assertThat(exists).isTrue();
+    }
+
+    @Test
+    void shouldCheckIfUserEmailDoesNotExists() {
+        // Given
+        User user = new User(null, "First", "Last", EMAIL, "Password");
+        underTest.save(user);
+
+        // When
+        Boolean exists = underTest.existsUserByEmail("email@example.com");
+
+        // Then
+        assertThat(exists).isFalse();
     }
 }

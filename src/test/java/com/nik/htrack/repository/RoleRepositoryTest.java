@@ -16,6 +16,7 @@ import java.util.Optional;
 class RoleRepositoryTest {
 
     public static final String ROLE_NAME = "ROLE_NAME";
+
     @Autowired
     private RoleRepository underTest;
 
@@ -27,7 +28,7 @@ class RoleRepositoryTest {
     @Test
     void shouldFindRoleByName() {
         // Given
-        Role role = new Role(1L, ROLE_NAME);
+        Role role = new Role(null, ROLE_NAME);
         underTest.save(role);
 
         // When
@@ -36,13 +37,13 @@ class RoleRepositoryTest {
         // Then
         assertThat(optionalRole)
             .isPresent()
-            .hasValueSatisfying(r -> assertThat(r).usingRecursiveComparison().isEqualTo(role));
+            .hasValueSatisfying(r -> assertThat(r).usingRecursiveComparison().ignoringFields("id").isEqualTo(role));
     }
 
     @Test
-    void shouldNotFindRoleByNameWhenNamelDoesNotExist() {
+    void shouldNotFindRoleByNameWhenNameDoesNotExist() {
         // Given
-        Role role = new Role(1L, ROLE_NAME);
+        Role role = new Role(null, ROLE_NAME);
         underTest.save(role);
 
         // When
@@ -50,5 +51,31 @@ class RoleRepositoryTest {
 
         // Then
         assertThat(optionalRole).isNotPresent();
+    }
+
+    @Test
+    void shouldCheckIfRoleNameExists() {
+        // Given
+        Role role = new Role(null, ROLE_NAME);
+        underTest.save(role);
+
+        // When
+        Boolean exists = underTest.existsRoleByName(ROLE_NAME);
+
+        // Then
+        assertThat(exists).isTrue();
+    }
+
+    @Test
+    void shouldCheckIfRoleNameDoesNotExists() {
+        // Given
+        Role role = new Role(null, ROLE_NAME);
+        underTest.save(role);
+
+        // When
+        Boolean exists = underTest.existsRoleByName("INVALID_ROLE_NAME");
+
+        // Then
+        assertThat(exists).isFalse();
     }
 }
