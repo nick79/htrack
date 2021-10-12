@@ -38,10 +38,10 @@ public class User {
     private Long id;
     @NotBlank
     @Column(name = "first_name", nullable = false, columnDefinition = "TEXT")
-    private String first_name;
+    private String firstName;
     @NotBlank
     @Column(name = "last_name", nullable = false, columnDefinition = "TEXT")
-    private String last_name;
+    private String lastName;
     @Email
     @Column(name = "email", nullable = false, columnDefinition = "TEXT")
     private String email;
