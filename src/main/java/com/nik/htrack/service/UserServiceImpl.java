@@ -75,4 +75,34 @@ public class UserServiceImpl implements UserService {
         log.debug("Fetching all users");
         return userRepository.findAll();
     }
+
+    @Override
+    public void deleteAllUsers() {
+        log.debug("Deleting all users");
+        userRepository.deleteAll();
+    }
+
+    @Override
+    public void deleteUser(final String email) {
+        log.debug("Deleting user {}", email);
+        userRepository
+            .findByEmail(email)
+            .orElseThrow(() -> new UserNotFoundException(format("User with email %s not found", email)));
+        userRepository.deleteByEmail(email);
+    }
+
+    @Override
+    public void deleteAllRoles() {
+        log.debug("Deleting all roles");
+        roleRepository.deleteAll();
+    }
+
+    @Override
+    public void deleteRole(final String roleName) {
+        log.debug("Deleting role {}", roleName);
+        roleRepository
+            .findByName(roleName)
+            .orElseThrow(() -> new RoleNotFoundException(format("Role with name %s not found", roleName)));
+        roleRepository.deleteByName(roleName);
+    }
 }

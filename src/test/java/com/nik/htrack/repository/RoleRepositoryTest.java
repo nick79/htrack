@@ -78,4 +78,17 @@ class RoleRepositoryTest {
         // Then
         assertThat(exists).isFalse();
     }
+
+    @Test
+    void shouldDeleteRoleWhenExists() {
+        Role role = new Role(null, ROLE_NAME);
+        underTest.save(role);
+
+        // When
+        underTest.deleteByName(ROLE_NAME);
+        Boolean exists = underTest.existsRoleByName(ROLE_NAME);
+
+        // Then
+        assertThat(exists).isFalse();
+    }
 }

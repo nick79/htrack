@@ -15,4 +15,12 @@ public interface UserService {
     User getUser(String email);
 
     List<User> getUsers();
+
+    void deleteAllUsers();
+
+    void deleteUser(String email);
+
+    void deleteAllRoles();
+
+    void deleteRole(String roleName);
 }

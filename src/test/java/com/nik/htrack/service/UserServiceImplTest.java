@@ -167,4 +167,58 @@ class UserServiceImplTest {
             .isInstanceOf(UserNotFoundException.class)
             .hasMessageContaining(format("User with email %s not found", EMAIL));
     }
+
+    @Test
+    void shouldDeleteUserWhenExists() {
+        // Given
+        User user = new User(null, "First", "Last", EMAIL, "Password");
+        given(userRepository.findByEmail(EMAIL)).willReturn(Optional.of(user));
+
+        // When
+        underTest.deleteUser(EMAIL);
+
+        // Then
+        then(userRepository).should().findByEmail(EMAIL);
+        then(userRepository).should().deleteByEmail(EMAIL);
+    }
+
+    @Test
+    void shouldThrowWhenDeleteUserWhenNotExists() {
+        // Given
+        User user = new User(null, "First", "Last", EMAIL, "Password");
+        given(userRepository.findByEmail(EMAIL)).willReturn(Optional.empty());
+
+        // When
+        // Then
+        assertThatThrownBy(() -> underTest.deleteUser(EMAIL))
+            .isInstanceOf(UserNotFoundException.class)
+            .hasMessageContaining(format("User with email %s not found", EMAIL));
+    }
+
+    @Test
+    void shouldDeleteRoleWhenExists() {
+        // Given
+        Role role = new Role(null, ROLE_NAME);
+        given(roleRepository.findByName(ROLE_NAME)).willReturn(Optional.of(role));
+
+        // When
+        underTest.deleteRole(ROLE_NAME);
+
+        // Then
+        then(roleRepository).should().findByName(ROLE_NAME);
+        then(roleRepository).should().deleteByName(ROLE_NAME);
+    }
+
+    @Test
+    void shouldThrowWhenDeleteRoleWhenNotExists() {
+        // Given
+        Role role = new Role(null, ROLE_NAME);
+        given(roleRepository.findByName(ROLE_NAME)).willReturn(Optional.empty());
+
+        // When
+        // Then
+        assertThatThrownBy(() -> underTest.deleteRole(ROLE_NAME))
+            .isInstanceOf(RoleNotFoundException.class)
+            .hasMessageContaining(format("Role with name %s not found", ROLE_NAME));
+    }
 }

@@ -11,4 +11,6 @@ public interface RoleRepository extends JpaRepository<Role, Long> {
     Optional<Role> findByName(final @NotBlank String name);
 
     boolean existsRoleByName(final @NotBlank String name);
+
+    void deleteByName(final @NotBlank String name);
 }

@@ -78,4 +78,18 @@ class UserRepositoryTest {
         // Then
         assertThat(exists).isFalse();
     }
+
+    @Test
+    void shouldDeleteUserWhenExists() {
+        // Given
+        User user = new User(null, "First", "Last", EMAIL, "Password");
+        underTest.save(user);
+
+        // When
+        underTest.deleteByEmail(EMAIL);
+        Boolean exists = underTest.existsUserByEmail(EMAIL);
+
+        // Then
+        assertThat(exists).isFalse();
+    }
 }
