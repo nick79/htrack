@@ -18,6 +18,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -54,4 +55,7 @@ public class User {
                joinColumns = @JoinColumn(name = "ht_user_id", foreignKey = @ForeignKey(name = "ht_user_id_fk")),
                inverseJoinColumns = @JoinColumn(name = "role_id", foreignKey = @ForeignKey(name = "role_id_fk")))
     private final List<Role> roles = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", orphanRemoval = true, cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
+    private final List<HabitSession> habitSessions = new ArrayList<>();
 }
