@@ -27,6 +27,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -286,6 +287,116 @@ class UserControllerTest {
             .andReturn();
 
         assertThat(addRoleToUserResult.getResolvedException()).isInstanceOf(RoleNotFoundException.class);
+    }
+
+    @Test
+    void shouldRecordSessionForUser() throws Exception {
+        // Given
+        User user = createRandomUser();
+        mockMvc
+            .perform(delete(UserController.BASE_API_PATH).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNoContent());
+        mockMvc
+            .perform(post(UserController.BASE_API_PATH)
+                         .contentType(MediaType.APPLICATION_JSON)
+                         .content(Objects.requireNonNull(objectInJson(user))))
+            .andExpect(status().isCreated());
+
+        mockMvc
+            .perform(delete(UserController.BASE_API_PATH
+                                + "/"
+                                + user.getEmail()
+                                + "/habit").contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNoContent());
+
+        RecordSessionCmd recordSessionCmd = new RecordSessionCmd("Habit_1", LocalDateTime.now(), LocalDateTime.now());
+
+        // When
+        // Then
+        MvcResult getSessionsResult = mockMvc
+            .perform(get(UserController.BASE_API_PATH
+                             + "/"
+                             + user.getEmail()
+                             + "/habit").contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+        List<RecordSessionResponse> sessions = objectMapper.readValue(getSessionsResult
+                                                                          .getResponse()
+                                                                          .getContentAsString(),
+                                                                      new TypeReference<>() {});
+        assertThat(sessions).asList().hasSize(0);
+
+        mockMvc
+            .perform(post(UserController.BASE_API_PATH + "/" + user.getEmail() + "/habit")
+                         .contentType(MediaType.APPLICATION_JSON)
+                         .content(Objects.requireNonNull(objectInJson(recordSessionCmd))))
+            .andExpect(status().isCreated());
+        getSessionsResult = mockMvc
+            .perform(get(UserController.BASE_API_PATH
+                             + "/"
+                             + user.getEmail()
+                             + "/habit").contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+        sessions = objectMapper.readValue(getSessionsResult.getResponse().getContentAsString(),
+                                          new TypeReference<>() {});
+        assertThat(sessions).asList().hasSize(1);
+    }
+
+    @Test
+    void shouldThrowWhenRecordSessionForUserThatNotExists() throws Exception {
+        // Given
+        User user = createRandomUser();
+        mockMvc
+            .perform(delete(UserController.BASE_API_PATH).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNoContent());
+        mockMvc
+            .perform(post(UserController.BASE_API_PATH)
+                         .contentType(MediaType.APPLICATION_JSON)
+                         .content(Objects.requireNonNull(objectInJson(user))))
+            .andExpect(status().isCreated());
+
+        mockMvc
+            .perform(delete(UserController.BASE_API_PATH
+                                + "/"
+                                + user.getEmail()
+                                + "/habit").contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNoContent());
+
+        RecordSessionCmd recordSessionCmd = new RecordSessionCmd("Habit_1", LocalDateTime.now(), LocalDateTime.now());
+
+        // When
+        // Then
+        MvcResult recordSessionForUser = mockMvc
+            .perform(post(UserController.BASE_API_PATH + "/INVALID_EMAIL/habit")
+                         .contentType(MediaType.APPLICATION_JSON)
+                         .content(Objects.requireNonNull(objectInJson(recordSessionCmd))))
+            .andExpect(status().isNotFound())
+            .andReturn();
+        assertThat(recordSessionForUser.getResolvedException()).isInstanceOf(UserNotFoundException.class);
+    }
+
+    @Test
+    void shouldThrowWhenDeleteSessionForUserThatNotExists() throws Exception {
+        // When
+        //Then
+        MvcResult deleteSessionsForUserResult = mockMvc
+            .perform(delete(UserController.BASE_API_PATH
+                                + "/INVALID_EMAIL/habit").contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound())
+            .andReturn();
+        assertThat(deleteSessionsForUserResult.getResolvedException()).isInstanceOf(UserNotFoundException.class);
+    }
+
+    @Test
+    void shouldThrowWhenGetSessionForUserThatNotExists() throws Exception {
+        // When
+        //Then
+        MvcResult getSessionsForUserResult = mockMvc
+            .perform(get(UserController.BASE_API_PATH + "/INVALID_EMAIL/habit").contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound())
+            .andReturn();
+        assertThat(getSessionsForUserResult.getResolvedException()).isInstanceOf(UserNotFoundException.class);
     }
 
     private User createRandomUser() {

@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import javax.validation.constraints.NotBlank;
 
@@ -27,4 +26,6 @@ public interface HabitSessionRepository extends JpaRepository<HabitSession, Long
 
     List<HabitSession> findByUserAndNameAndStartIsAfterAndEndIsBefore(
         final User user, final @NotBlank String name, final LocalDateTime start, final LocalDateTime end);
+
+    void deleteByUser(final User user);
 }

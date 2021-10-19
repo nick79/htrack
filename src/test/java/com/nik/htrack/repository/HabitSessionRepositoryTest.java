@@ -240,4 +240,30 @@ class HabitSessionRepositoryTest {
             .asList()
             .hasSize(1);
     }
+
+    @Test
+    void shouldDeleteAllRecordedSessionsForUser() {
+        // Given
+        User user = new User(null, "First", "Last", "first.last@example.com", "Password");
+        user = userRepository.save(user);
+
+        HabitSession habitSession1 = new HabitSession(null,
+                                                      HABIT_SESSION_NAME,
+                                                      LocalDateTime.now().minusMinutes(30L),
+                                                      LocalDateTime.now().minusMinutes(20L),
+                                                      user);
+        underTest.save(habitSession1);
+        HabitSession habitSession2 = new HabitSession(null,
+                                                      "Habit_2",
+                                                      LocalDateTime.now().minusMinutes(30L),
+                                                      LocalDateTime.now().minusMinutes(20L),
+                                                      user);
+        underTest.save(habitSession2);
+
+        // When
+        underTest.deleteByUser(user);
+
+        // Then
+        assertThat(underTest.findByUser(user)).asList().hasSize(0);
+    }
 }
